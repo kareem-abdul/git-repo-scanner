@@ -1,7 +1,5 @@
 import { StatusError } from '@errors/status.error';
-import { properties } from '@properties';
 import { githubService } from '@service';
-import axios from 'axios';
 import { Router } from 'express';
 import { graphqlHTTP, OptionsData } from 'express-graphql';
 import { buildSchema } from 'graphql';
@@ -21,14 +19,6 @@ let schema = buildSchema(`
       owner: String!
   }
 `);
-
-const getGitUser = (token: string) => axios.request({
-    baseURL: properties.git.baseUrl,
-    url: '/user',
-    headers: {
-        'Authorization': `token ${token}`
-    }
-});
 
 var root = {
     repositories: async ({ token }: any) => {
