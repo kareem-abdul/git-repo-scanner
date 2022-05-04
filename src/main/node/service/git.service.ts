@@ -21,7 +21,7 @@ const request = <T>(token: string, config: AxiosRequestConfig) => axios.request<
     ...config,
     baseURL: properties.git.baseUrl,
     headers: {
-        Authroization: `token ${token}`,
+        Authorization: `token ${token}`,
         ...config.headers
     },
 });
