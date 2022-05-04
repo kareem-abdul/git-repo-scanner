@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "es2016",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "newLine": "lf",
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "typeRoots": [
+      "./@types",
+      "./node_modules/@types"
+    ],
+
+    "baseUrl": "./src",
+    "paths": {
+      "@properties": ["main/resources/app.properties"],
+      "@constants": ["main/node/constants"],
+      "@config": ["main/node/config/index.config"],
+      "@config/*": ["main/node/config/*"],
+      "@service": ["main/node/service/index.service"],
+      "@service/*": ["main/node/service/*"],
+      "@errors/*": ["main/node/errors/*"],
+      "@routes": ["main/node/routes/index.route"],
+      "@resources/*": ["main/resources/*"],
+      "@app": ["main/node/app"],
+      "@app/*": ["main/node/*"]
+    },
+
+    "experimentalDecorators": true,
+    "noEmitOnError": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true
+  },
+  "include": [
+    "src/**/*",
+    "src/**/*.json"
+  ]
+}
