@@ -22,5 +22,6 @@ export const properties = {
 
     git: {
         baseUrl: 'https://api.github.com',
+        maxParallerProcess: 2,
     },
 };
