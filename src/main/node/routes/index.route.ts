@@ -11,6 +11,11 @@ export const router = Router();
 
 
 let schema = buildSchema(`
+
+ type Mutation {
+    startRepositoryScanning(token: String!): String
+  }
+    
   type Query {
       repositories(token: String!): [RepositoryShort!]!
       repository(token: String!, name: String!, noCache: Boolean = false): Repository!
@@ -45,6 +50,9 @@ let schema = buildSchema(`
 `);
 
 var root = {
+    startRepositoryScanning: async ({ token }: any) => {
+        return 'lijukrks166'
+    },
     repositories: async ({ token }: any) => {
         const user = await githubService.getUser(token);
         return githubService.getUserRepos(token, user.login)
