@@ -1,3 +1,5 @@
+import { getRepoInfo, scanRepositories } from '@app/jobs/repository-scanner.process';
+import { log } from '@config';
 import { StatusError } from '@errors/status.error';
 import { githubService } from '@service';
 import { AppUtils } from '@utils';
@@ -5,7 +7,7 @@ import { Router } from 'express';
 import { graphqlHTTP, OptionsData } from 'express-graphql';
 import { buildSchema } from 'graphql';
 import httpStatus from 'http-status';
-import { basename, join, sep } from 'path';
+import { join, sep } from 'path';
 
 export const router = Router();
 
@@ -17,7 +19,7 @@ let schema = buildSchema(`
   }
     
   type Query {
-      repositories(token: String!): [RepositoryShort!]!
+      repositories(user: String!): [RepositoryShort!]!
       repository(token: String!, name: String!, noCache: Boolean = false): Repository!
   }
 
@@ -50,75 +52,36 @@ let schema = buildSchema(`
 `);
 
 var root = {
-    startRepositoryScanning: async ({ token }: any) => {
-        return 'lijukrks166'
-    },
-    repositories: async ({ token }: any) => {
-        const user = await githubService.getUser(token);
-        return githubService.getUserRepos(token, user.login)
-            .then(repositories => repositories.map(
-                repository => ({
-                    name: repository.name,
-                    size: repository.size,
-                    owner: repository.owner.login,
-                })
-            ));
+    repositories: async ({ user }: any) => {
+        const repoInfo = await getRepoInfo(user);
+        return Object.keys(repoInfo).map(key => {
+            const repository = repoInfo[key];
+            return {
+                name: repository.name,
+                size: repository.size,
+                owner: repository.owner,
+            };
+        });
     },
     repository: async ({ token, name, noCache }: any) => {
         const user = await githubService.getUser(token);
-        let repository: any;
-        let repositoryFiles: string[];
+        const repoInfo = await getRepoInfo(user.login);
+        let repository = repoInfo[name];
         return {
-            name: async () => {
-                if (!repository) {
-                    repository = await githubService.getUserRepo(token, user.login, name)
-                }
-                return repository.name;
-            },
-            size: async () => {
-                if (!repository) {
-                    repository = await githubService.getUserRepo(token, user.login, name)
-                }
-                return repository.size;
-            },
-            owner: async () => {
-                if (!repository) {
-                    repository = await githubService.getUserRepo(token, user.login, name)
-                }
-                return repository.owner.login;
-            },
-            private: async () => {
-                if (!repository) {
-                    repository = await githubService.getUserRepo(token, user.login, name)
-                }
-                return repository.private;
-            },
-            activeWebHooks: async () => {
-                return (await githubService.getRepoWebHooks(token, user.login, name))
-                    .filter((hook) => hook.active)
-                    .map((hook) => ({
-                        name: hook.name,
-                        url: hook.config.url,
-                    }));
-            },
-            numberOfFiles: async () => {
-                const path = await githubService.cloneRepository(token, user.login, name, noCache as boolean);
-                if (!repositoryFiles) {
-                    repositoryFiles = await AppUtils.listArchiveFiles(path);
-                }
-                return repositoryFiles.length;
-            },
+            name: repository.name,
+            size: repository.size,
+            owner: repository.owner,
+            private: repository.private,
+            activeWebHooks: repository.activeWebHooks,
+            numberOfFiles: repository.numberOfFiles,
             files: async ({ pattern, random }: any) => {
                 const path = await githubService.cloneRepository(token, user.login, name, noCache as boolean);
-                if (!repositoryFiles) {
-                    repositoryFiles = await AppUtils.listArchiveFiles(path);
-                }
+                const repositoryFiles = (await AppUtils.listArchiveFiles(path))[0];
                 const reg = new RegExp(pattern);
                 let match = repositoryFiles.filter((file) => reg.test(file));
-                if(random) {
+                if (random) {
                     match = [match[Math.ceil(Math.random() * match.length)]];
                 }
-                console.log(match);
                 return match.map(async (file) => {
                     const parts = file.split(sep);
                     parts.shift();
