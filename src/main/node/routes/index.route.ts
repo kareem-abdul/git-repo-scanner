@@ -10,13 +10,21 @@ export const router = Router();
 
 let schema = buildSchema(`
   type Query {
-      repositories(token: String!): [Repository!]!
+      repositories(token: String!): [RepositoryShort!]!
+      repository(token: String!, name: String!): Repository!
+  }
+
+  type RepositoryShort {
+      name: String!
+      size: Int!
+      owner: String!
   }
 
   type Repository {
       name: String!
       size: Int!
       owner: String!
+      private: Boolean!
   }
 `);
 
@@ -31,6 +39,16 @@ var root = {
                     owner: repository.owner.login,
                 })
             ));
+    },
+    repository: async ({ token, name }: any) => {
+        const user = await githubService.getUser(token);
+        const repository = await githubService.getUserRepo(token, user.login, name);
+        return {
+            name: repository.name,
+            size: repository.size,
+            owner: repository.owner.login,
+            private: repository.private,
+        }
     },
 };
 
