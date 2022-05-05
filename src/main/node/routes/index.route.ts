@@ -1,13 +1,10 @@
-import { constants } from '@constants';
 import { StatusError } from '@errors/status.error';
 import { githubService } from '@service';
 import { AppUtils } from '@utils';
 import { Router } from 'express';
 import { graphqlHTTP, OptionsData } from 'express-graphql';
-import { existsSync } from 'fs';
 import { buildSchema } from 'graphql';
 import httpStatus from 'http-status';
-import { resolve } from 'path';
 
 export const router = Router();
 
@@ -53,13 +50,33 @@ var root = {
     },
     repository: async ({ token, name }: any) => {
         const user = await githubService.getUser(token);
-        const repository = await githubService.getUserRepo(token, user.login, name);
-        let repositoryTarPath:string = resolve(constants.TEMP_DIR, `${user.login}-${name}.tar.gz`);
+        let repository: any;
+        let repositoryFiles: any[];
         return {
-            name: repository.name,
-            size: repository.size,
-            owner: repository.owner.login,
-            private: repository.private,
+            name: async () => {
+                if (!repository) {
+                    repository = await githubService.getUserRepo(token, user.login, name)
+                }
+                return repository.name;
+            },
+            size: async () => {
+                if (!repository) {
+                    repository = await githubService.getUserRepo(token, user.login, name)
+                }
+                return repository.size;
+            },
+            owner: async () => {
+                if (!repository) {
+                    repository = await githubService.getUserRepo(token, user.login, name)
+                }
+                return repository.owner.login;
+            },
+            private: async () => {
+                if (!repository) {
+                    repository = await githubService.getUserRepo(token, user.login, name)
+                }
+                return repository.private;
+            },
             activeWebHooks: async () => {
                 return (await githubService.getRepoWebHooks(token, user.login, name))
                     .filter((hook) => hook.active)
@@ -69,11 +86,11 @@ var root = {
                     }));
             },
             numberOfFiles: async () => {
-                if (!existsSync(repositoryTarPath)) {
-                    repositoryTarPath = await githubService.cloneRepository(token, user.login, name);
+                if (!repositoryFiles) {
+                    const path = await githubService.cloneRepository(token, user.login, name);
+                    repositoryFiles = await AppUtils.listArchiveFiles(path);
                 }
-                const arhiveFiles = await AppUtils.listArchiveFiles(repositoryTarPath);
-                return arhiveFiles.length;
+                return repositoryFiles.length;
             },
         }
     },
