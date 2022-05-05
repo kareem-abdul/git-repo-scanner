@@ -16,6 +16,12 @@ export const getUserRepos = async (token: string, user: string) => {
     }).then((res) => res.data);
 };
 
+export const getUserRepo = async (token: string, user: string, repo: string) => {
+    log.info('getting user %s repo %s', user, repo);
+    return request<any>(token, {
+        url: `/repos/${user}/${repo}`,
+    }).then((res) => res.data);
+}
 
 const request = <T>(token: string, config: AxiosRequestConfig) => axios.request<T>({
     ...config,
