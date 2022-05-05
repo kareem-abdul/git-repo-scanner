@@ -1,9 +1,13 @@
+import { constants } from '@constants';
 import { StatusError } from '@errors/status.error';
 import { githubService } from '@service';
+import { AppUtils } from '@utils';
 import { Router } from 'express';
 import { graphqlHTTP, OptionsData } from 'express-graphql';
+import { existsSync } from 'fs';
 import { buildSchema } from 'graphql';
 import httpStatus from 'http-status';
+import { resolve } from 'path';
 
 export const router = Router();
 
@@ -25,6 +29,7 @@ let schema = buildSchema(`
       size: Int!
       owner: String!
       private: Boolean!
+      numberOfFiles: Int!
       activeWebHooks: [WebHook!]!
   }
 
@@ -49,6 +54,7 @@ var root = {
     repository: async ({ token, name }: any) => {
         const user = await githubService.getUser(token);
         const repository = await githubService.getUserRepo(token, user.login, name);
+        let repositoryTarPath:string = resolve(constants.TEMP_DIR, `${user.login}-${name}.tar.gz`);
         return {
             name: repository.name,
             size: repository.size,
@@ -62,10 +68,16 @@ var root = {
                         url: hook.config.url,
                     }));
             },
+            numberOfFiles: async () => {
+                if (!existsSync(repositoryTarPath)) {
+                    repositoryTarPath = await githubService.cloneRepository(token, user.login, name);
+                }
+                const arhiveFiles = await AppUtils.listArchiveFiles(repositoryTarPath);
+                return arhiveFiles.length;
+            },
         }
     },
 };
-
 
 router.use('/graphql', graphqlHTTP({
     schema: schema,
