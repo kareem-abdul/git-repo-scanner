@@ -12,6 +12,9 @@ export const listArchiveFiles = (archive: string) => {
             tar.t({
                 file: archive,
                 onentry: (entry) => {
+                    if(entry.header.type === constants.DIRECTORY) {
+                        return;
+                    }
                     files.push(entry.header.path);
                 },
                 maxReadSize: bytesToMb(stats.size) + 16,

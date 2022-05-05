@@ -8,4 +8,5 @@ export const constants = {
     TEMP_DIR: './tmp',
     UTF_8: 'utf-8',
     ONE_MB: 1048576, // 1024 * 1024
+    DIRECTORY: 'Directory',
 } as const;
