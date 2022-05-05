@@ -45,9 +45,9 @@ export const cloneRepository = async (token: string, user: string, repo: string)
     log.info('cloning repository %s of user %s', repo, user);
     return request<any>(token, {
         url: `/repos/${user}/${repo}/tarball`,
-        responseType: 'blob',
+        responseType: 'arraybuffer',
     }).then(async (response) => {
-        const fileName = `${user}-${repo}`
+        const fileName = `${user}-${repo}.tar.gz`
         log.debug('saving %s to tmp directory %s', fileName, constants.TEMP_DIR);
         const path = resolve(constants.TEMP_DIR, fileName);
         if (!existsSync(constants.TEMP_DIR)) {
