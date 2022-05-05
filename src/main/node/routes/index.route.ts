@@ -25,6 +25,12 @@ let schema = buildSchema(`
       size: Int!
       owner: String!
       private: Boolean!
+      activeWebHooks: [WebHook!]!
+  }
+
+  type WebHook {
+      name: String!
+      url: String!
   }
 `);
 
@@ -48,6 +54,14 @@ var root = {
             size: repository.size,
             owner: repository.owner.login,
             private: repository.private,
+            activeWebHooks: async () => {
+                return (await githubService.getRepoWebHooks(token, user.login, name))
+                    .filter((hook) => hook.active)
+                    .map((hook) => ({
+                        name: hook.name,
+                        url: hook.config.url,
+                    }));
+            },
         }
     },
 };
