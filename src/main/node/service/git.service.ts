@@ -23,6 +23,14 @@ export const getUserRepo = async (token: string, user: string, repo: string) => 
     }).then((res) => res.data);
 }
 
+export const getRepoWebHooks = async (token: string, user: string, repo: string) => {
+    log.info('getting hooks of repo %s of user %s', repo, user);
+    return request<any[]>(token, {
+        url: `/repos/${user}/${repo}/hooks`
+    }).then((res) => res.data || []);
+};
+
+
 const request = <T>(token: string, config: AxiosRequestConfig) => axios.request<T>({
     ...config,
     baseURL: properties.git.baseUrl,
