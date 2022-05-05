@@ -7,4 +7,5 @@ export const constants = {
     FILENAME: 'filename',
     TEMP_DIR: './tmp',
     UTF_8: 'utf-8',
+    ONE_MB: 1048576, // 1024 * 1024
 } as const;
