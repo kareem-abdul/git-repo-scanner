@@ -25,6 +25,8 @@
       "@service/*": ["main/node/service/*"],
       "@errors/*": ["main/node/errors/*"],
       "@routes": ["main/node/routes/index.route"],
+      "@utils": ["main/node/utils/index.utils"],
+      "@utils/*": ["main/node/utils/*"],
       "@resources/*": ["main/resources/*"],
       "@app": ["main/node/app"],
       "@app/*": ["main/node/*"]
