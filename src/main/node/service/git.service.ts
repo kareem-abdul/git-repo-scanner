@@ -47,12 +47,7 @@ export const cloneRepository = async (token: string, user: string, repo: string)
         url: `/repos/${user}/${repo}/tarball`,
         responseType: 'blob',
     }).then(async (response) => {
-        const fileName = (
-            response.headers[constants.CONTENT_DISPOSITION]
-                .split(';')
-                .map((part) => part.trim())
-                .find((part) => part.startsWith(constants.FILENAME)) as string
-        ).split("=")[1];
+        const fileName = `${user}-${repo}`
         log.debug('saving %s to tmp directory %s', fileName, constants.TEMP_DIR);
         const path = resolve(constants.TEMP_DIR, fileName);
         if (!existsSync(constants.TEMP_DIR)) {
@@ -66,8 +61,6 @@ export const cloneRepository = async (token: string, user: string, repo: string)
         return path;
     });
 };
-
-
 
 const request = <T>(token: string, config: AxiosRequestConfig) => axios.request<T>({
     ...config,
