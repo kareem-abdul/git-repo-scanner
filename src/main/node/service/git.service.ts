@@ -3,7 +3,7 @@ import { constants } from '@constants';
 import { properties } from '@properties';
 import axios, { AxiosRequestConfig } from 'axios';
 import { existsSync } from 'fs';
-import { mkdir, writeFile } from 'fs/promises';
+import { mkdir, unlink, writeFile } from 'fs/promises';
 import { resolve } from 'path';
 
 export const getUser = async (token: string) => {
@@ -41,15 +41,24 @@ export const getRepositoryContents = async (token: string, user: string, repo: s
     }).then((res) => res.data || []);
 }
 
-export const cloneRepository = async (token: string, user: string, repo: string) => {
+export const cloneRepository = async (token: string, user: string, repo: string, noCache: boolean = false) => {
     log.info('cloning repository %s of user %s', repo, user);
+    const fileName = `${user}-${repo}.tar.gz`;
+    const path = resolve(constants.TEMP_DIR, fileName);
+    if(!noCache) {
+        log.debug('checking repository in cache')
+        if(existsSync(path)) {
+            log.verbose('repository exists on cache')
+            return path;
+        }
+    } else {
+        await unlink(path);
+    }
     return request<any>(token, {
         url: `/repos/${user}/${repo}/tarball`,
         responseType: 'arraybuffer',
     }).then(async (response) => {
-        const fileName = `${user}-${repo}.tar.gz`
         log.debug('saving %s to tmp directory %s', fileName, constants.TEMP_DIR);
-        const path = resolve(constants.TEMP_DIR, fileName);
         if (!existsSync(constants.TEMP_DIR)) {
             log.verbose('making temp dir %s', constants.TEMP_DIR);
             await mkdir(constants.TEMP_DIR);
