@@ -6,12 +6,14 @@ import tar from 'tar';
 export const listArchiveFiles = (archive: string) => {
     log.verbose('listing tar files');
     const files: string[] = [];
-    return new Promise<string[]>((resolve, reject) => {
+    let size: number = 0;
+    return new Promise<[string[], number]>((resolve, reject) => {
         try {
             const stats = statSync(archive);
             tar.t({
                 file: archive,
                 onentry: (entry) => {
+                    size += entry.header.size as number;
                     if(entry.header.type === constants.DIRECTORY) {
                         return;
                     }
@@ -22,7 +24,7 @@ export const listArchiveFiles = (archive: string) => {
                 if (err) {
                     reject(err);
                 }
-                resolve(files);
+                resolve([files, size]);
             });
         } catch (err) {
             reject(err);
