@@ -1,5 +1,6 @@
 import { getRepoInfo, scanRepositories } from '@app/jobs/repository-scanner.process';
 import { log } from '@config';
+import { constants } from '@constants';
 import { StatusError } from '@errors/status.error';
 import { githubService } from '@service';
 import { AppUtils } from '@utils';
@@ -7,7 +8,7 @@ import { Router } from 'express';
 import { graphqlHTTP, OptionsData } from 'express-graphql';
 import { buildSchema } from 'graphql';
 import httpStatus from 'http-status';
-import { join, sep } from 'path';
+import path, { join, sep } from 'path';
 
 export const router = Router();
 
@@ -95,6 +96,17 @@ var root = {
                 });
             }
         }
+    },
+    startRepositoryScanning: async ({ token }: any): Promise<string> => {
+        const user = await githubService.getUser(token);
+        log.info('started scanning repositories of user %s', user.login);
+        const repositories = await githubService.getUserRepos(token, user.login);
+        await scanRepositories(user.login, repositories.map((repository) => ({
+            token,
+            user: user.login,
+            meta: repository,
+        })));
+        return user.login;
     },
 };
 
