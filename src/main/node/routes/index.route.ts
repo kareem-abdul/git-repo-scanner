@@ -101,7 +101,7 @@ var root = {
         const user = await githubService.getUser(token);
         log.info('started scanning repositories of user %s', user.login);
         const repositories = await githubService.getUserRepos(token, user.login);
-        await scanRepositories(user.login, repositories.map((repository) => ({
+        scanRepositories(user.login, repositories.map((repository) => ({
             token,
             user: user.login,
             meta: repository,
