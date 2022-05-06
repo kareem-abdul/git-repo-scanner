@@ -1,0 +1,39 @@
+.table-heading{
+ width: 200px;
+ padding: 5px;
+ text-align: initial;
+}
+.table-body{
+    width: 200px;
+    padding: 5px;
+    text-align: initial;
+}
+.repo-details-container{
+    width: 30%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding-left: 35%;
+    padding-right: 35%;
+}
+.back-button{
+    margin:10px;
+}
+.repo-list-container{
+    width: 50%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding-left: 25%;
+    padding-right: 25%;
+}
+.form-container{
+    display: flex;
+    flex-direction: column;
+    height: 20vh;
+    justify-content: space-evenly;
+}
