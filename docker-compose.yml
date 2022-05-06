@@ -6,19 +6,19 @@ services:
     container_name: backend
     restart: on-failure
     build: 
-      context: .
-      dockerfile: backend/Dockerfile
-    expose:
-      - 8080
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
     networks:
       - scan-network
   frontend:
     container_name: frontend
     restart: on-failure
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
-    port:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
       - 3000:80
     networks:
       - scan-network
