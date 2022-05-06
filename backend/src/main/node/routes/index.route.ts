@@ -15,7 +15,7 @@ export const router = Router();
 let schema = buildSchema(`
 
  type Mutation {
-    startRepositoryScanning(token: String!): String
+    startRepositoryScanning(token: String!, noCache: Boolean! = false): String
   }
     
   type Query {
@@ -99,11 +99,11 @@ var root = {
             }
         }
     },
-    startRepositoryScanning: async ({ token }: any): Promise<string> => {
+    startRepositoryScanning: async ({ token, noCache }: any): Promise<string> => {
         const user = await githubService.getUser(token);
         log.info('started scanning repositories of user %s', user.login);
         const repositories = await githubService.getUserRepos(token, user.login);
-        scanRepositories(user.login, repositories.map((repository) => ({
+        scanRepositories(user.login, noCache, repositories.map((repository) => ({
             token,
             user: user.login,
             meta: repository,

@@ -23,8 +23,10 @@ export const getRepoInfo = async (user: string): Promise<Record<string, any>> =>
     return {};
 }
 
-export const scanRepositories = async (user: string, repositories: Repository[]) => {
-    async.concatLimit<Repository, any>(repositories, properties.git.maxParallerProcess, scanRepository, async (err, result) => {
+export const scanRepositories = async (user: string, noCache: boolean, repositories: Repository[]) => {
+    async.concatLimit<Repository, any>(repositories, properties.git.maxParallerProcess, (repository, callback) => {
+        return scanRepository(repository, noCache, callback);
+    }, async (err, result) => {
         if (err) {
             log.error('failed to scan repositories of %s', user);
             log.error(err);
@@ -48,9 +50,9 @@ export const scanRepositories = async (user: string, repositories: Repository[])
     });
 };
 
-const scanRepository: AsyncResultIterator<Repository, any> = async (repository: Repository, callback: AsyncResultCallback<any>) => {
+const scanRepository = async (repository: Repository, noCache: boolean, callback: AsyncResultCallback<any>) => {
     log.info('scanning %s repository of user %s', repository.meta.name, repository.user);
-    const path = await githubService.cloneRepository(repository.token, repository.user, repository.meta.name);
+    const path = await githubService.cloneRepository(repository.token, repository.user, repository.meta.name, noCache);
     let [repositoryFiles, size] = await AppUtils.listArchiveFiles(path);
     return callback(null, {
         name: repository.meta.name,
