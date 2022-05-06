@@ -1,6 +1,5 @@
 import { getRepoInfo, scanRepositories } from '@app/jobs/repository-scanner.process';
 import { log } from '@config';
-import { constants } from '@constants';
 import { StatusError } from '@errors/status.error';
 import { githubService } from '@service';
 import { AppUtils } from '@utils';
@@ -8,7 +7,7 @@ import { Router } from 'express';
 import { graphqlHTTP, OptionsData } from 'express-graphql';
 import { buildSchema } from 'graphql';
 import httpStatus from 'http-status';
-import path, { join, sep } from 'path';
+import { join, sep } from 'path';
 
 export const router = Router();
 
@@ -68,6 +67,9 @@ var root = {
         const user = await githubService.getUser(token);
         const repoInfo = await getRepoInfo(user.login);
         let repository = repoInfo[name];
+        if (!repository) {
+            throw new StatusError(httpStatus.BAD_REQUEST, 'repositories not scanned');
+        }
         return {
             name: repository.name,
             size: repository.size,
